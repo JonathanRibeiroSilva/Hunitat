@@ -1,0 +1,15 @@
+{
+  "extends": "@hubitat/config/tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true,
+    "declaration": false,
+    "isolatedModules": false
+  },
+  "include": ["src/**/*.ts"]
+}

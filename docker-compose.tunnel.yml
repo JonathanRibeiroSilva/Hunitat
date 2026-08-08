@@ -1,0 +1,64 @@
+# Overlay for testing voice, video and audio range with someone who is not on
+# this network. Layered on docker-compose.yml, never used alone:
+#
+#   docker compose --env-file .env.tunnel \
+#                  -f docker-compose.yml -f docker-compose.tunnel.yml \
+#                  up -d --build
+#   ngrok http 5173
+#
+# `npm run tunnel:docker` wraps exactly that.
+#
+# Then send the https URL. Full walkthrough: docs/remote-media-testing.md
+#
+# Two things differ from the normal stack, and both are about the same problem —
+# a URL baked for `localhost` resolves, on the guest's machine, to the guest's
+# machine.
+
+services:
+  web:
+    build:
+      args:
+        # Empty on purpose, and literal rather than interpolated: the base file
+        # writes ${VITE_API_URL:-http://localhost:3000}, and `:-` substitutes its
+        # default for an EMPTY value too, not just a missing one. Passing the
+        # empty string through that expression would silently restore localhost.
+        #
+        # Empty makes the client address whatever origin served the page, which
+        # nginx then proxies to the api. One published port, tunnellable, and no
+        # rebuild when the tunnel URL changes.
+        VITE_API_URL: ""
+        VITE_WS_URL: ""
+
+  api:
+    environment:
+      # The SFU cannot be tunnelled: LiveKit publishes ICE candidates as
+      # `node-ip:port` and nothing rewrites them, so a tunnelled SFU hands the
+      # browser an address it cannot reach — the room connects, both avatars
+      # appear, and there is no sound. LiveKit Cloud terminates TLS and runs
+      # TURN itself, which is exactly the part a tunnel cannot supply.
+      #
+      # `:?` stops the stack with a readable message rather than booting an api
+      # that mints tokens no SFU will accept.
+      #
+      # The names are LIVEKIT_CLOUD_* and not LIVEKIT_* deliberately. `.env`
+      # already defines LIVEKIT_URL as ws://localhost:7880, so if these shared
+      # the name, `:?` would quietly resolve against .env whenever .env.tunnel
+      # forgot to set it — booting the whole stack pointed at localhost, which
+      # is the exact failure this file exists to prevent. A name that appears
+      # in only one file cannot be satisfied by the other.
+      LIVEKIT_URL: ${LIVEKIT_CLOUD_URL:?set LIVEKIT_CLOUD_URL to wss://<project>.livekit.cloud in .env.tunnel}
+      # One address serves both here, unlike the split in the base file: the
+      # cloud SFU is reached the same way by the server and by the browser.
+      LIVEKIT_PUBLIC_URL: ${LIVEKIT_CLOUD_URL}
+      LIVEKIT_API_KEY: ${LIVEKIT_CLOUD_API_KEY:?set LIVEKIT_CLOUD_API_KEY in .env.tunnel}
+      LIVEKIT_API_SECRET: ${LIVEKIT_CLOUD_API_SECRET:?set LIVEKIT_CLOUD_API_SECRET in .env.tunnel}
+
+  # Kept out of `up` by giving it a profile nobody requests. Left running it
+  # would be a second SFU that no client is pointed at — harmless, but it holds
+  # the UDP range and invites the wrong conclusion when audio misbehaves.
+  #
+  # A profile only stops a service being CREATED. One already running from a
+  # previous `docker compose up` keeps running, untouched, because compose sees
+  # nothing to reconcile — which is why `npm run tunnel:docker` stops it first.
+  livekit:
+    profiles: ["unused-in-tunnel-mode"]

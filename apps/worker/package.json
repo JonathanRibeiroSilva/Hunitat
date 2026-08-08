@@ -1,0 +1,31 @@
+{
+  "name": "@hubitat/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput & node --watch dist/main.js",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rimraf dist",
+    "lint": "echo 'lint: not configured yet'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@gltf-transform/core": "^4.1.1",
+    "@gltf-transform/extensions": "^4.1.1",
+    "@gltf-transform/functions": "^4.1.1",
+    "@hubitat/protocol": "*",
+    "meshoptimizer": "^0.22.0",
+    "pg": "^8.22.0",
+    "pg-boss": "^10.1.5"
+  },
+  "devDependencies": {
+    "@hubitat/config": "*",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.20.4",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  }
+}

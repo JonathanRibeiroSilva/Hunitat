@@ -1,0 +1,15 @@
+{
+  "name": "@hubitat/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "tsconfig.base.json",
+    "tsconfig.lib.json",
+    "prettier.config.js"
+  ],
+  "scripts": {
+    "lint": "echo 'no lint for config'",
+    "typecheck": "echo 'no typecheck for config'"
+  }
+}

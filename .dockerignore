@@ -1,0 +1,50 @@
+# Without this file the Dockerfiles are wrong on any machine that has run
+# `npm install`. Both of them do `COPY --from=deps /repo/node_modules` and then
+# `COPY . .`, so an un-ignored host `node_modules` lands on top of the one the
+# image just resolved — carrying the host's platform-specific binaries (esbuild,
+# rollup) into a linux/amd64 image, where they fail to load. NFR-36 says a clean
+# machine, and a clean machine would have worked; every developer's machine
+# would not.
+node_modules
+**/node_modules
+
+# Build output is produced inside the image. Copying the host's in only risks
+# shipping something staler than what was just compiled.
+dist
+**/dist
+build
+**/build
+
+# Turborepo and Vite caches: large, machine-local, and meaningless in the image.
+.turbo
+**/.turbo
+.vite
+**/.vite
+
+.git
+.gitignore
+.github
+
+# Secrets stay out of the image. The api reads them at runtime via
+# `env_file: .env` in docker-compose.yml, which is a mount, not a layer.
+.env
+.env.*
+!.env.example
+
+*.log
+npm-debug.log*
+coverage
+.DS_Store
+Thumbs.db
+
+# Editor and agent scratch space.
+.vscode
+.idea
+.claude
+
+# Documentation does not change the built artifact. `assets/` deliberately stays
+# in: the api both reads the Map Document and serves the directory statically.
+docs
+specs
+*.md
+!README.md

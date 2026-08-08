@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "id": "office",
+  "name": "Head Office",
+
+  "bounds": {
+    "min": { "x": -13, "y": -1, "z": -9 },
+    "max": { "x": 13, "y": 5, "z": 9 }
+  },
+
+  "geometry": {
+    "url": "/assets/world/office.glb",
+    "collisionMode": "convention"
+  },
+
+  "spawns": [
+    {
+      "id": "main",
+      "position": { "x": 0, "y": 0, "z": 5 },
+      "yaw": 0,
+      "default": true,
+      "radiusM": 1.5
+    },
+    {
+      "id": "east",
+      "position": { "x": 8, "y": 0, "z": 5 },
+      "yaw": 0,
+      "default": false,
+      "radiusM": 1.5
+    },
+    {
+      "id": "meeting",
+      "position": { "x": -6.5, "y": 0, "z": -4.1 },
+      "yaw": 3.14159,
+      "default": false,
+      "radiusM": 0.6
+    },
+    {
+      "id": "from-atrium",
+      "position": { "x": -9.5, "y": 0, "z": 5 },
+      "yaw": 1.5708,
+      "default": false,
+      "radiusM": 1.2
+    }
+  ],
+
+  "environment": {
+    "ambientColor": "#ffffff",
+    "ambientIntensity": 0.65,
+    "sunDirection": { "x": -0.4, "y": -1, "z": -0.25 },
+    "sunColor": "#fff3e0",
+    "sunIntensity": 1.1,
+    "background": "#9fb8c8",
+    "fog": { "color": "#9fb8c8", "near": 30, "far": 90 }
+  },
+
+  "zones": [
+    {
+      "id": "huddle-meeting",
+      "type": "private",
+      "volume": {
+        "shape": "box",
+        "center": { "x": -8.6, "y": 1.25, "z": -5.5 },
+        "size": { "x": 7.0, "y": 3.5, "z": 5.2 },
+        "yaw": 0
+      },
+      "properties": { "gain": 1.0, "chatEnabled": true }
+    },
+    {
+      "id": "stage",
+      "type": "spotlight",
+      "volume": {
+        "shape": "cylinder",
+        "center": { "x": 9.5, "y": 1.25, "z": -5 },
+        "radius": 2.5,
+        "height": 3.5
+      },
+      "properties": { "gain": 1.0, "scope": "map" }
+    },
+    {
+      "id": "portal-to-east",
+      "type": "portal",
+      "volume": {
+        "shape": "cylinder",
+        "center": { "x": -4, "y": 1.25, "z": 6.5 },
+        "radius": 0.9,
+        "height": 3.5
+      },
+      "properties": { "target": { "spawnId": "east" } }
+    },
+    {
+      "id": "portal-to-meeting",
+      "type": "portal",
+      "volume": {
+        "shape": "cylinder",
+        "center": { "x": 10.5, "y": 1.25, "z": 6.5 },
+        "radius": 0.9,
+        "height": 3.5
+      },
+      "properties": { "target": { "spawnId": "meeting" } }
+    },
+    {
+      "id": "portal-to-atrium",
+      "type": "portal",
+      "volume": {
+        "shape": "cylinder",
+        "center": { "x": -11.4, "y": 1.25, "z": 5 },
+        "radius": 0.9,
+        "height": 3.5
+      },
+      "properties": { "target": { "mapId": "atrium", "spawnId": "from-office" } }
+    },
+    {
+      "id": "west-corridor",
+      "type": "trigger",
+      "volume": {
+        "shape": "box",
+        "center": { "x": -8, "y": 1.25, "z": 3 },
+        "size": { "x": 6, "y": 3.5, "z": 3 },
+        "yaw": 0
+      },
+      "properties": { "key": "west-corridor", "chatEnabled": true }
+    },
+    {
+      "id": "meeting-table",
+      "type": "collision",
+      "volume": {
+        "shape": "box",
+        "center": { "x": -8.5, "y": 0.375, "z": -5.5 },
+        "size": { "x": 3, "y": 0.75, "z": 1.4 },
+        "yaw": 0
+      },
+      "properties": {}
+    },
+    {
+      "id": "spawn-main",
+      "type": "spawn",
+      "volume": {
+        "shape": "box",
+        "center": { "x": 0, "y": 1.25, "z": 5 },
+        "size": { "x": 3, "y": 3.5, "z": 3 },
+        "yaw": 0
+      },
+      "properties": { "spawnId": "main", "rule": "least-crowded" }
+    },
+    {
+      "id": "spawn-east",
+      "type": "spawn",
+      "volume": {
+        "shape": "box",
+        "center": { "x": 8, "y": 1.25, "z": 5 },
+        "size": { "x": 3, "y": 3.5, "z": 3 },
+        "yaw": 0
+      },
+      "properties": { "spawnId": "east", "rule": "least-crowded" }
+    }
+  ],
+  "objects": [],
+
+  "movement": {
+    "allowJump": true,
+    "walkSpeedMultiplier": 1.0
+  }
+}

@@ -1,0 +1,23 @@
+# LiveKit single-node development configuration.
+# Unused until phase 2; declared now so the service starts and the path is proven.
+# See docs/adr/0006-media-livekit-sfu.md
+
+port: 7880
+
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 50100
+  use_external_ip: false
+
+# Development keys. Replace both in any deployment — the secret must be at least
+# 32 characters and must match LIVEKIT_API_SECRET in .env.
+keys:
+  devkey: devsecret-change-me-at-least-32-chars
+
+logging:
+  level: info
+  json: false
+
+# Single-node: no Redis block. Adding one here would mean multi-node, which
+# reopens ADR 0009.

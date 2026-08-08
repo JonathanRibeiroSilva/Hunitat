@@ -1,0 +1,50 @@
+{
+  "name": "@hubitat/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput & node --watch dist/main.js",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rimraf dist",
+    "lint": "echo 'lint: not configured yet'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1106.0",
+    "@aws-sdk/s3-request-presigner": "^3.1106.0",
+    "@hubitat/protocol": "*",
+    "@hubitat/world-core": "*",
+    "@nestjs/common": "^10.4.15",
+    "@nestjs/config": "^3.3.0",
+    "@nestjs/core": "^10.4.15",
+    "@nestjs/jwt": "^10.2.0",
+    "@nestjs/platform-express": "^10.4.15",
+    "argon2": "^0.41.1",
+    "cookie-parser": "^1.4.7",
+    "lib0": "^0.2.117",
+    "livekit-server-sdk": "^2.17.0",
+    "nodemailer": "^6.10.1",
+    "pg": "^8.22.0",
+    "pg-boss": "^10.4.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.31",
+    "ws": "^8.18.0",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.32",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@hubitat/config": "*",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "@types/nodemailer": "^6.4.24",
+    "@types/pg": "^8.20.4",
+    "@types/ws": "^8.5.13",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  }
+}

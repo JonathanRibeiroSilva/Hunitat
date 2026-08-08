@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+/* Tailwind v4 scans the files it is told about. The shared UI package is
+   consumed as source precisely so its class names survive to here. */
+@source "../../../packages/ui/src";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  overscroll-behavior: none;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
+
+/*
+ * HUD geometry — the one number the docks share.
+ *
+ * The bottom-centre dock (emotes over the media bar) is pinned to the middle of
+ * the viewport, so a side rail that grows past the middle minus half that dock
+ * ends up underneath it. `--hud-rail` is that limit: rails clamp their width
+ * against it and shrink on a narrow window instead of overlapping. 9.5rem is
+ * half the widest the dock gets (six emote buttons) plus a gutter.
+ */
+:root {
+  --hud-rail: calc(50vw - 9.5rem);
+}
+
+/* specs/ux/phase-01-screens.md — respect prefers-reduced-motion by skipping
+   easing and fades. Camera smoothing is handled in code; this covers the DOM. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

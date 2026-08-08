@@ -1,0 +1,28 @@
+{
+  "name": "@hubitat/harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "npm run build && node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rimraf dist",
+    "lint": "echo 'lint: not configured yet'"
+  },
+  "dependencies": {
+    "@hubitat/protocol": "*",
+    "@hubitat/world-core": "*",
+    "lib0": "^0.2.117",
+    "ws": "^8.18.0",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.32"
+  },
+  "devDependencies": {
+    "@hubitat/config": "*",
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  }
+}

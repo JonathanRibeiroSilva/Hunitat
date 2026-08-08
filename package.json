@@ -1,0 +1,31 @@
+{
+  "name": "hubitat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted 3D spatial collaboration platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rimraf node_modules",
+    "harness": "npm run start --workspace @hubitat/harness",
+    "tunnel": "node scripts/tunnel.mjs",
+    "tunnel:docker": "docker compose -f docker-compose.yml stop livekit && docker compose --env-file .env.tunnel -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "packageManager": "npm@10.9.0"
+}

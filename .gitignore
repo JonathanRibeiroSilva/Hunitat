@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+# Holds LiveKit Cloud credentials — see .env.tunnel.example
+.env.tunnel
+
+.DS_Store
+Thumbs.db
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+docker/volumes/
+*.log

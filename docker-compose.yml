@@ -1,0 +1,157 @@
+# Seven services. `web` and `api` from phase 1, `livekit` from phase 2, `postgres` from
+# phase 5 (chat history — ADR 0008) and phase 6 (accounts), `mailpit` from phase 6
+# (password recovery, development only), `minio` from phase 9 (the asset library), and
+# `worker` from phase 9 — the asset pipeline, in its own process.
+# See docs/architecture.md#runtime-topology.
+#
+# There is deliberately no Redis — see docs/adr/0009-no-redis-in-memory-pgboss.md.
+# The job queue is pg-boss, in the database that is already there.
+
+name: hubitat
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+        VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3000/ws}
+    ports:
+      - "${WEB_PORT:-5173}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "${API_PORT:-3000}:3000"
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+      # Under Compose the database is declared, healthy and depended on, so
+      # falling back to in-memory chat history would hide a real outage behind a
+      # feature that silently forgets conversations. `auto` is for bare-metal
+      # development, where there may genuinely be no database (phase 5).
+      CHAT_PERSISTENCE: ${CHAT_PERSISTENCE:-postgres}
+      # Same reasoning one phase later (FR-6.8). Under Compose the database is
+      # declared, healthy and depended on, so booting without accounts would
+      # admit everybody as a guest — the inverse of what a Space set to require
+      # accounts was set to do. `auto` is for bare-metal development, where there
+      # may genuinely be no database.
+      ACCOUNTS: ${ACCOUNTS:-required}
+      # Two addresses for one SFU, deliberately. The server talks to it over the
+      # Docker network; the browser cannot resolve that name and needs the
+      # published port. One value for both is the bug where voice works on
+      # bare metal and dies under Compose.
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_PUBLIC_URL: ${LIVEKIT_PUBLIC_URL:-ws://localhost:7880}
+      MINIO_ENDPOINT: minio
+      # Two addresses for one bucket, for the reason LiveKit has two: the api
+      # signs URLs the *browser* follows, and `minio:9000` resolves only inside
+      # this network. A presigned URL carries its host inside the signature, so
+      # it cannot be rewritten afterwards — it has to be signed against the
+      # address the browser will use (phase 9).
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9000}
+      SMTP_HOST: mailpit
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Phase 9, FR-9.13 — the asset pipeline, in its own process.
+  #
+  # Not a second command on the api container. Optimizing a model is tens of
+  # seconds of synchronous CPU, the api runs the 20 Hz world tick, and an
+  # out-of-memory kill while decompressing a large upload must not drop every
+  # WebSocket connection in the deployment. It also holds no sockets and serves
+  # nothing, which is what makes it the right place to parse untrusted uploads
+  # (NFR-33).
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+      MINIO_ENDPOINT: minio
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hubitat}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-in-production}
+      POSTGRES_DB: ${POSTGRES_DB:-hubitat}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hubitat}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # Single-node mode needs no Redis. Multi-node would, and would reopen ADR 0009.
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml --node-ip 127.0.0.1
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50100:50000-50100/udp"
+    volumes:
+      - ./docker/livekit.yaml:/etc/livekit.yaml:ro
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-hubitat}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-me-in-production}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Password recovery (FR-6.5), development only: Mailpit accepts everything and
+  # delivers to a web inbox on :8025, so a reset link can be followed without a
+  # relay. In production point SMTP_* at a real one — or disable recovery
+  # entirely by leaving SMTP_HOST empty, which is supported and is what makes
+  # this the only outbound dependency in the product (ADR 0011).
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+  # Optional: only needed behind restrictive NAT. On an internal network the
+  # LiveKit host candidates are usually reachable directly.
+  # coturn:
+  #   image: coturn/coturn:latest
+  #   network_mode: host
+  #   volumes:
+  #     - ./docker/turnserver.conf:/etc/coturn/turnserver.conf:ro
+
+volumes:
+  postgres-data:
+  minio-data:
