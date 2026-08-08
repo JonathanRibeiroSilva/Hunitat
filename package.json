@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "description": "Self-hosted 3D spatial collaboration platform",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonathanRibeiroSilva/Hubitat.git"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
