@@ -1,6 +1,6 @@
 <div align="center">
 
-# Hubitat
+<img src="docs/hubitat.svg" alt="Hubitat" height="150"/>
 
 **A self-hosted, open-source 3D spatial collaboration platform.**
 
